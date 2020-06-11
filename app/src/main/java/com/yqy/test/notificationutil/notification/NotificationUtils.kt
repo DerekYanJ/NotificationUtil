@@ -1,13 +1,19 @@
 package com.yqy.test.notificationutil.notification
 
 import android.annotation.TargetApi
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
 /**
@@ -18,56 +24,220 @@ import androidx.core.app.NotificationManagerCompat
  */
 object NotificationUtils {
     private const val TAG = "NotificationUtils"
+    var isShowLog = true
 
     /**
-     * 通知渠道信息
+     * 创建并显示默认通知
      */
-    data class NotificationChannelBean (
-        val channelId: String,
-        val channelName: String,
-        val importance: Int)
+    fun createAndShow(
+        context: Context,
+        channelId: String,
+        notificationId: Int,
+        tag: String? = null,
+        whenTime: Long? = System.currentTimeMillis(),
+        smallIconResId: Int? = 0,
+        largeIconBitmap: Bitmap? = null,
+        contentTitle: String? = "",
+        contentText: String? = "",
+        pendingIntent: PendingIntent? = null,
+        defaults: Int? = null
+    ) {
+        // 创建通知
+        val notification = create(
+            context,
+            channelId,
+            whenTime,
+            smallIconResId,
+            largeIconBitmap,
+            contentTitle,
+            contentText,
+            defaults,
+            pendingIntent
+        )
+
+        // 显示通知
+        show(context, notificationId, notification, tag)
+    }
 
     /**
-     * 通过 context 和 channelList 批量创建通知渠道
+     * 创建默认通知
      *
-     * 8.0 以上调用
+     * @param context 上下文
+     * @param channelId 渠道id
+     * @param whenTime 通知时间
+     * @param smallIconResId 通知小图标
+     * @param largeIconBitmap 通知大图
+     * @param contentTitle 标题
+     * @param contentText 内容
+     * @param defaults 设置
+     * @param pendingIntent 点击意图
      */
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun createNotificationChannel(context: Context, channelList: List<NotificationChannelBean>) {
-        if (channelList.isNotEmpty()) {
-            channelList.forEach {
-                createNotificationChannel(context, it.channelId, it.channelName, it.importance)
+    fun create(
+        context: Context,
+        channelId: String,
+        whenTime: Long? = System.currentTimeMillis(),
+        smallIconResId: Int? = 0,
+        largeIconBitmap: Bitmap? = null,
+        contentTitle: String? = "",
+        contentText: String? = "",
+        defaults: Int? = null,
+        pendingIntent: PendingIntent? = null
+    ): Notification? {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            if (!isChannelAlreadyCreated(context, channelId)) {
+                // 通知渠道已创建
+                log("创建通知失败: 渠道(channelId:${channelId})未创建")
+                return null
             }
+            if (!isChannelsEnabled(context, channelId, false)) {
+                // 通知渠道未打开
+                log("创建通知失败: 通知渠道(channelId:$channelId)未打开")
+                return null
+            }
+        }
+
+        // 适配通知栏build的创建方式
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationCompat.Builder(context, channelId)
+        } else {
+            NotificationCompat.Builder(context)
+        }
+
+        // set
+        if (whenTime != null) builder.setWhen(whenTime)
+        if (smallIconResId != null && smallIconResId > 0) builder.setSmallIcon(smallIconResId)
+        if (largeIconBitmap != null) builder.setLargeIcon(largeIconBitmap)
+        if (contentTitle != null) builder.setContentTitle(contentTitle)
+        if (contentText != null) builder.setContentText(contentText)
+        if (defaults != null) builder.setDefaults(defaults)
+        if (pendingIntent != null) builder.setContentIntent(pendingIntent)
+
+        return  builder.build()
+    }
+
+    /**
+     * 打开通知
+     */
+    fun show(context: Context, notificationId: Int, notification: Notification?, tag: String? = null) {
+        if (notification != null) {
+            NotificationManagerCompat.from(context).notify(tag, notificationId, notification)
         }
     }
 
     /**
-     * 创建通知渠道
-     *
-     * 8.0 以上调用
+     * 关闭指定 id 的通知
+     */
+    fun cancel(context: Context, notificationId: Int, tag: String? = null) {
+        NotificationManagerCompat.from(context).cancel(tag, notificationId)
+
+    }
+
+    /**
+     * 关闭所有通知
+     */
+    fun cancelAll(context: Context) {
+        NotificationManagerCompat.from(context).cancelAll()
+    }
+
+
+    /**
+     * 创建多个通知渠道
      */
     @RequiresApi(Build.VERSION_CODES.O)
-    fun createNotificationChannel(
+    fun createChannels(context: Context, channelList: List<NotificationChannel>) {
+        if (channelList.isNotEmpty()) {
+            // 创建多个通知渠道
+            NotificationManagerCompat.from(context).createNotificationChannels(channelList)
+        }
+    }
+
+    /**
+     * 创建单个通知渠道
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun createChannel(context: Context, channelBean: NotificationChannel) {
+        if (!checkChannelParam(channelBean)) {
+            return
+        }
+        if (isChannelAlreadyCreated(context, channelBean.id)) {
+            // 通知渠道已创建
+            log("渠道(channelId:${channelBean.id})创建失败：已创建")
+            return
+        }
+        // 创建通知渠道
+        NotificationManagerCompat.from(context).createNotificationChannel(channelBean)
+    }
+
+    /**
+     * 创建单个通知渠道
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun createChannel(
         context: Context,
         channelId: String,
         channelName: String,
         importance: Int
     ) {
         val channel = NotificationChannel(channelId, channelName, importance)
-        val notificationManager = context.getSystemService(
-            Context.NOTIFICATION_SERVICE ) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
+        createChannel(context, channel)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun buildNotificationChannel(
+        channelId: String,
+        channelName: String,
+        importance: Int
+    ): NotificationChannel = NotificationChannel(channelId, channelName, importance)
+
+    /**
+     * 检查 channelBean 参数是否合法
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun checkChannelParam(channelBean: NotificationChannel): Boolean {
+        if (channelBean.id.isEmpty() || channelBean.name.isEmpty()) {
+            log("渠道(channelId:${channelBean.id})创建失败：参数错误")
+            return false
+        }
+        if (channelBean.importance != NotificationManagerCompat.IMPORTANCE_NONE
+            && channelBean.importance != NotificationManagerCompat.IMPORTANCE_MIN
+            && channelBean.importance != NotificationManagerCompat.IMPORTANCE_LOW
+            && channelBean.importance != NotificationManagerCompat.IMPORTANCE_DEFAULT
+            && channelBean.importance != NotificationManagerCompat.IMPORTANCE_HIGH
+            && channelBean.importance != NotificationManagerCompat.IMPORTANCE_MAX
+        ) {
+            log("渠道(channelId:${channelBean.id})创建失败：importance参数错误")
+            return false
+        }
+        return true
+    }
+
+    /**
+     * 渠道是否已经创建
+     *
+     * @return true 已创建 false 未创建
+     */
+    private fun isChannelAlreadyCreated(context: Context, channelId: String): Boolean {
+        var mChannel: NotificationChannel? = null
+        try {
+            // 获取通知渠道
+            mChannel = NotificationManagerCompat.from(context).getNotificationChannel(channelId)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return mChannel != null
     }
 
     /**
      * 指定渠道是否打开
      *
-     * 8.0 以上调用
+     * @param isIntentSetting: true 跳转到通知设置页
      */
     @TargetApi(Build.VERSION_CODES.O)
-    fun isChannelEnabled(
+    fun isChannelsEnabled(
         context: Context,
-        channelId: String?,
+        channelId: String,
         isIntentSetting: Boolean
     ): Boolean {
         val manager =
@@ -95,28 +265,41 @@ object NotificationUtils {
     /**
      * 通知权限是否打开
      */
-    fun isEnableNotification(context: Context): Boolean {
+    fun areNotificationsEnabled(context: Context): Boolean {
         return NotificationManagerCompat.from(context).areNotificationsEnabled()
     }
 
     /**
-     * 关闭指定 id 的通知
+     * 打开通知设置
+     *
+     * 需要适配不同版本
      */
-    fun cancelNotificationById(context: Context, id: Int) {
-        val manager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.cancel(id)
+    fun openSetting(context: Context) {
+        val intent = Intent()
+        when {
+            Build.VERSION.SDK_INT >= 26 -> {
+                // android 8.0引导
+                intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+                intent.putExtra("android.provider.extra.APP_PACKAGE", context.packageName)
+            }
+            Build.VERSION.SDK_INT >= 21 -> {
+                // android 5.0-7.0
+                intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+                intent.putExtra("app_package", context.packageName)
+                intent.putExtra("app_uid", context.applicationInfo.uid)
+            }
+            else -> {
+                // 其他
+                intent.action = "android.settings.APPLICATION_DETAILS_SETTINGS"
+                intent.data = Uri.fromParts("package", context.packageName, null)
+            }
+        }
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        context.startActivity(intent)
     }
 
-    /**
-     * 关闭所有通知
-     */
-    fun cancelAllNotification(context: Context) {
-        val manager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.cancelAll()
+    fun log(content: String) {
+        if (isShowLog)
+            Log.e(TAG, content)
     }
-
-
-
 }

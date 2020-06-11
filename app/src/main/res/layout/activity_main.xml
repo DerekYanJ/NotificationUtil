@@ -7,11 +7,91 @@
     tools:context=".MainActivity">
 
     <Button
+        android:id="@+id/btn_open_setting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="打开通知设置"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <Button
+        android:id="@+id/btn_check_notification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="检查通知权限"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_open_setting"/>
+
+    <Button
         android:id="@+id/btn_no_exit_channel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="测试不存在的通知渠道"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_check_notification"/>
+
+    <Button
+        android:id="@+id/btn_create_channel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="创建单个通知渠道"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_no_exit_channel"/>
+
+    <Button
+        android:id="@+id/btn_create_channels"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="创建多个通知渠道"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_create_channel"/>
+
+    <Button
+        android:id="@+id/btn_create_notification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="创建单个通知(不带大图)"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_create_channels"/>
+
+    <Button
+        android:id="@+id/btn_create_notifications"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="创建多个通知(不带大图)"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_create_notification"/>
+
+    <Button
+        android:id="@+id/btn_create_big_notification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="创建单个通知(带大图)"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_create_notifications"/>
+
+    <Button
+        android:id="@+id/btn_create_big_notifications"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="创建多个通知(带大图)"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_create_big_notification"/>
+
+    <Button
+        android:id="@+id/btn_cancel_notification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="关闭单个通知"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_create_big_notifications"/>
+
+    <Button
+        android:id="@+id/btn_cancel_notifications"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="关闭所有通知"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_cancel_notification"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
