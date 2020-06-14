@@ -1,10 +1,7 @@
 package com.yqy.test.notificationutil.notification
 
 import android.annotation.TargetApi
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -178,18 +175,79 @@ object NotificationUtils {
         context: Context,
         channelId: String,
         channelName: String,
-        importance: Int
+        importance: Int,
+        groupId: String? = ""
     ) {
         val channel = NotificationChannel(channelId, channelName, importance)
+        if (!groupId.isNullOrEmpty())
+            channel.group = groupId
         createChannel(context, channel)
     }
 
+    /**
+     * 删除单个渠道
+     */
+    fun deleteChannel(context: Context, channelId: String) {
+        NotificationManagerCompat.from(context).deleteNotificationChannel(channelId)
+    }
+
+    /**
+     * 删除多个渠道
+     */
+    fun deleteChannels(context: Context, channelIds: List<String>) {
+        channelIds.forEach { deleteChannel(context, it) }
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
-    fun buildNotificationChannel(
+    fun createChannelGroup(context: Context, channelGroup: NotificationChannelGroup) {
+        NotificationManagerCompat.from(context).createNotificationChannelGroup(channelGroup)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun createChannelGroups(context: Context, channelGroupList: List<NotificationChannelGroup>) {
+        channelGroupList.forEach {
+            createChannelGroup(context, it)
+        }
+    }
+
+    /**
+     * 删除单个渠道组
+     */
+    fun deleteChannelGroup(context: Context, groupId: String) {
+        NotificationManagerCompat.from(context).deleteNotificationChannelGroup(groupId)
+    }
+
+    /**
+     * 删除多个渠道组
+     */
+    fun deleteChannelGroups(context: Context, groupIds: List<String>) {
+        groupIds.forEach { deleteChannelGroup(context, it) }
+    }
+
+    /**
+     * 创建 NotificationChannel 对象
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun buildChannel(
         channelId: String,
         channelName: String,
-        importance: Int
-    ): NotificationChannel = NotificationChannel(channelId, channelName, importance)
+        importance: Int,
+        groupId: String? = ""
+    ): NotificationChannel {
+        val channel = NotificationChannel(channelId, channelName, importance)
+        if (!groupId.isNullOrEmpty()) {
+            channel.group = groupId
+        }
+        return channel
+    }
+
+    /**
+     * 创建 NotificationChannelGroup 对象
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun buildChannelGroup(groupId: String, groupName: String): NotificationChannelGroup {
+        return NotificationChannelGroup(groupId, groupName)
+    }
 
     /**
      * 检查 channelBean 参数是否合法

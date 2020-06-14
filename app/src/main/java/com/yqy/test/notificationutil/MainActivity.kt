@@ -37,23 +37,54 @@ class MainActivity : AppCompatActivity() {
         btn_no_exit_channel.setOnClickListener {
             Log.e(TAG, "mNotificationChannel =11")
             Toast.makeText(this, "sksds", Toast.LENGTH_SHORT).show()
-            val mNotificationChannel = NotificationManagerCompat.from(this).getNotificationChannel("111")
+            val mNotificationChannel =
+                NotificationManagerCompat.from(this).getNotificationChannel("111")
             Log.e(TAG, "mNotificationChannel = $mNotificationChannel")
         }
 
         btn_create_channel.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationUtils.createChannel(this, "101", "渠道1", NotificationManagerCompat.IMPORTANCE_HIGH)
+                NotificationUtils.createChannel(
+                    this,
+                    "101",
+                    "渠道1", NotificationManagerCompat.IMPORTANCE_HIGH,
+                    "g_101")
             }
         }
 
         btn_create_channels.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel1 = NotificationUtils.buildNotificationChannel(
-                    "102", "渠道2", NotificationManagerCompat.IMPORTANCE_HIGH)
-                val channel2 = NotificationUtils.buildNotificationChannel(
-                    "103", "渠道3", NotificationManagerCompat.IMPORTANCE_HIGH)
+                val channel1 = NotificationUtils.buildChannel(
+                    "102",
+                    "渠道2",
+                    NotificationManagerCompat.IMPORTANCE_HIGH,
+                    "g_102")
+                val channel2 = NotificationUtils.buildChannel(
+                    "103",
+                    "渠道3",
+                    NotificationManagerCompat.IMPORTANCE_HIGH,
+                    "g_103")
                 NotificationUtils.createChannels(this, arrayListOf(channel1, channel2))
+            }
+        }
+
+        btn_create_channel_group.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationUtils.createChannelGroup(
+                    this,
+                    NotificationUtils.buildChannelGroup("g_101", "渠道组1"))
+            }
+        }
+
+        btn_create_channel_groups.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channelGroup1 =
+                    NotificationUtils.buildChannelGroup("g_102", "渠道组2")
+                val channelGroup2 =
+                    NotificationUtils.buildChannelGroup("g_103", "渠道组3")
+                NotificationUtils.createChannelGroups(
+                    this,
+                    arrayListOf(channelGroup1, channelGroup2))
             }
         }
 
@@ -120,7 +151,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         btn_create_big_notification.setOnClickListener {
-            val bitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_audio, null);
+            val bitmap =
+                BitmapFactory.decodeResource(resources, R.mipmap.ic_audio, null);
             val notification = NotificationUtils.create(
                 this,
                 channel1,
@@ -134,7 +166,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         btn_create_big_notifications.setOnClickListener {
-            val bitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_audio, null);
+            val bitmap =
+                BitmapFactory.decodeResource(resources, R.mipmap.ic_audio, null);
             val notification = NotificationUtils.create(
                 this,
                 channel1,

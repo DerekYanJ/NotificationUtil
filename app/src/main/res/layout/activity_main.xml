@@ -47,12 +47,28 @@
         app:layout_constraintTop_toBottomOf="@id/btn_create_channel"/>
 
     <Button
+        android:id="@+id/btn_create_channel_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="创建单个通知渠道组"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_create_channels"/>
+
+    <Button
+        android:id="@+id/btn_create_channel_groups"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="创建多个通知渠道组"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_create_channel_group"/>
+
+    <Button
         android:id="@+id/btn_create_notification"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="创建单个通知(不带大图)"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_create_channels"/>
+        app:layout_constraintTop_toBottomOf="@id/btn_create_channel_groups"/>
 
     <Button
         android:id="@+id/btn_create_notifications"
