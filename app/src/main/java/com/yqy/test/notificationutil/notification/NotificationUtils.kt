@@ -138,7 +138,6 @@ object NotificationUtils {
         NotificationManagerCompat.from(context).cancelAll()
     }
 
-
     /**
      * 创建多个通知渠道
      */
@@ -146,6 +145,17 @@ object NotificationUtils {
     fun createChannels(context: Context, channelList: List<NotificationChannel>) {
         if (channelList.isNotEmpty()) {
             // 创建多个通知渠道
+            // 校验每个通知渠道的渠道组是否创建 若其中一个渠道组未创建则任务结束
+            channelList.forEach {
+                if (it.group != null
+                    && it.group.isNotEmpty()
+                    && !isChannelGroupAlreadyCreated(context, it.group)
+                ) {
+                    // 渠道组未创建
+                    log("多渠道创建失败：渠道组(groupId:${it.group})未创建")
+                    return
+                }
+            }
             NotificationManagerCompat.from(context).createNotificationChannels(channelList)
         }
     }
@@ -161,6 +171,15 @@ object NotificationUtils {
         if (isChannelAlreadyCreated(context, channelBean.id)) {
             // 通知渠道已创建
             log("渠道(channelId:${channelBean.id})创建失败：已创建")
+            return
+        }
+        if (channelBean.group != null
+            && channelBean.group.isNotEmpty()
+            && !isChannelGroupAlreadyCreated(context, channelBean.group)
+        ) {
+            // 渠道组未创建
+            log("渠道(channelId:${channelBean.id})创建失败：" +
+                    "渠道组(groupId:${channelBean.group})未创建")
             return
         }
         // 创建通知渠道
@@ -198,11 +217,17 @@ object NotificationUtils {
         channelIds.forEach { deleteChannel(context, it) }
     }
 
+    /**
+     * 创建单个渠道组
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     fun createChannelGroup(context: Context, channelGroup: NotificationChannelGroup) {
         NotificationManagerCompat.from(context).createNotificationChannelGroup(channelGroup)
     }
 
+    /**
+     * 创建多个渠道组
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     fun createChannelGroups(context: Context, channelGroupList: List<NotificationChannelGroup>) {
         channelGroupList.forEach {
@@ -285,6 +310,19 @@ object NotificationUtils {
             e.printStackTrace()
         }
         return mChannel != null
+    }
+
+    /**
+     * 渠道组是否创建
+     */
+    private fun isChannelGroupAlreadyCreated(context: Context, groupId: String): Boolean {
+        var mChannelGroup: NotificationChannelGroup? = null
+        try {
+            mChannelGroup = NotificationManagerCompat.from(context).getNotificationChannelGroup(groupId)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return mChannelGroup != null
     }
 
     /**
