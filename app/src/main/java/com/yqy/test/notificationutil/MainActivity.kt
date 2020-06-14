@@ -13,9 +13,13 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
 
-    private val channel1 = "101"
-    private val channel2 = "102"
-    private val channel3 = "103"
+    private val channelId1 = "101"
+    private val channelId2 = "102"
+    private val channelId3 = "103"
+    
+    private val channelGroupId1 = "g_101"
+    private val channelGroupId2 = "g_102"
+    private val channelGroupId3 = "g_103"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,23 +52,23 @@ class MainActivity : AppCompatActivity() {
                     this,
                     "101",
                     "渠道1", NotificationManagerCompat.IMPORTANCE_HIGH,
-                    "g_101")
+                    channelGroupId1)
             }
         }
 
         btn_create_channels.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel1 = NotificationUtils.buildChannel(
+                val channelId1 = NotificationUtils.buildChannel(
                     "102",
                     "渠道2",
                     NotificationManagerCompat.IMPORTANCE_HIGH,
                     "g_102")
-                val channel2 = NotificationUtils.buildChannel(
+                val channelId2 = NotificationUtils.buildChannel(
                     "103",
                     "渠道3",
                     NotificationManagerCompat.IMPORTANCE_HIGH,
                     "g_103")
-                NotificationUtils.createChannels(this, arrayListOf(channel1, channel2))
+                NotificationUtils.createChannels(this, arrayListOf(channelId1, channelId2))
             }
         }
 
@@ -72,7 +76,7 @@ class MainActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 NotificationUtils.createChannelGroup(
                     this,
-                    NotificationUtils.buildChannelGroup("g_101", "渠道组1"))
+                    NotificationUtils.buildChannelGroup(channelGroupId1, "渠道组1"))
             }
         }
 
@@ -91,7 +95,7 @@ class MainActivity : AppCompatActivity() {
         btn_create_notification.setOnClickListener {
             val notification = NotificationUtils.create(
                 this,
-                channel1,
+                channelId1,
                 whenTime = System.currentTimeMillis(),
                 smallIconResId = R.mipmap.ic_launcher,
                 contentTitle = "通知标题0",
@@ -103,7 +107,7 @@ class MainActivity : AppCompatActivity() {
         btn_create_notifications.setOnClickListener {
             val notification = NotificationUtils.create(
                 this,
-                channel1,
+                channelId1,
                 whenTime = System.currentTimeMillis(),
                 smallIconResId = R.mipmap.ic_launcher,
                 contentTitle = "通知标题1",
@@ -114,7 +118,7 @@ class MainActivity : AppCompatActivity() {
 
             NotificationUtils.createAndShow(
                 this,
-                channel1,
+                channelId1,
                 notificationId = 2,
                 whenTime = System.currentTimeMillis(),
                 smallIconResId = R.mipmap.ic_launcher,
@@ -123,7 +127,7 @@ class MainActivity : AppCompatActivity() {
             )
             NotificationUtils.createAndShow(
                 this,
-                channel1,
+                channelId1,
                 notificationId = 3,
                 whenTime = System.currentTimeMillis(),
                 smallIconResId = R.mipmap.ic_launcher,
@@ -132,7 +136,7 @@ class MainActivity : AppCompatActivity() {
             )
             NotificationUtils.createAndShow(
                 this,
-                channel1,
+                channelId1,
                 notificationId = 4,
                 whenTime = System.currentTimeMillis(),
                 smallIconResId = R.mipmap.ic_launcher,
@@ -141,7 +145,7 @@ class MainActivity : AppCompatActivity() {
             )
             NotificationUtils.createAndShow(
                 this,
-                channel1,
+                channelId1,
                 notificationId = 5,
                 whenTime = System.currentTimeMillis(),
                 smallIconResId = R.mipmap.ic_launcher,
@@ -155,7 +159,7 @@ class MainActivity : AppCompatActivity() {
                 BitmapFactory.decodeResource(resources, R.mipmap.ic_audio, null);
             val notification = NotificationUtils.create(
                 this,
-                channel1,
+                channelId1,
                 whenTime = System.currentTimeMillis(),
                 smallIconResId = R.mipmap.ic_launcher,
                 contentTitle = "通知标题0",
@@ -170,7 +174,7 @@ class MainActivity : AppCompatActivity() {
                 BitmapFactory.decodeResource(resources, R.mipmap.ic_audio, null);
             val notification = NotificationUtils.create(
                 this,
-                channel1,
+                channelId1,
                 whenTime = System.currentTimeMillis(),
                 smallIconResId = R.mipmap.ic_launcher,
                 contentTitle = "通知标题21",
@@ -182,7 +186,7 @@ class MainActivity : AppCompatActivity() {
 
             NotificationUtils.createAndShow(
                 this,
-                channel1,
+                channelId1,
                 notificationId = 22,
                 whenTime = System.currentTimeMillis(),
                 smallIconResId = R.mipmap.ic_launcher,
@@ -192,7 +196,7 @@ class MainActivity : AppCompatActivity() {
             )
             NotificationUtils.createAndShow(
                 this,
-                channel1,
+                channelId1,
                 notificationId = 23,
                 whenTime = System.currentTimeMillis(),
                 smallIconResId = R.mipmap.ic_launcher,
@@ -202,7 +206,7 @@ class MainActivity : AppCompatActivity() {
             )
             NotificationUtils.createAndShow(
                 this,
-                channel1,
+                channelId1,
                 notificationId = 24,
                 whenTime = System.currentTimeMillis(),
                 smallIconResId = R.mipmap.ic_launcher,
@@ -212,7 +216,7 @@ class MainActivity : AppCompatActivity() {
             )
             NotificationUtils.createAndShow(
                 this,
-                channel1,
+                channelId1,
                 notificationId = 25,
                 whenTime = System.currentTimeMillis(),
                 smallIconResId = R.mipmap.ic_launcher,
@@ -231,6 +235,23 @@ class MainActivity : AppCompatActivity() {
             NotificationUtils.cancelAll(this)
         }
 
+        btn_delete_channel.setOnClickListener { 
+            NotificationUtils.deleteChannel(this, channelId1)
+        }
+        
+        btn_delete_channels.setOnClickListener { 
+            NotificationUtils.deleteChannels(this, arrayListOf(channelId2, channelId3))
+        }
+
+        btn_delete_channel_group.setOnClickListener { 
+            NotificationUtils.deleteChannelGroup(this, channelGroupId1)
+        }
+        
+        btn_delete_channel_groups.setOnClickListener { 
+            NotificationUtils.deleteChannelGroups(this, arrayListOf(channelGroupId2, channelGroupId3))
+        }
+        
+        
 
     }
 }
